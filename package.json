@@ -1,0 +1,19 @@
+{
+  "name": "stensberg-kuali-challenge",
+  "version": "1.0.0",
+  "description": "required packages",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cantaloupemoon/Stensberg_Kuali_Challenge.git"
+  },
+  "author": "Shawn Stensberg <shawn.stensberg@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "csvtojson": "^2.0.10",
+    "fs": "0.0.1-security"
+  }
+}
