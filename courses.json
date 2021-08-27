@@ -1,0 +1,46 @@
+[
+    {
+        "subjectCode": "ACCT",
+        "number": "101",
+        "title": "Accounting 101",
+        "creditType": "fixed",
+        "creditsMin": "3",
+        "creditsMax": "",
+        "dateStart": "Fall 2021",
+        "department": "Accounting",
+        "campus": "Central"
+    },
+    {
+        "subjectCode": "MATH",
+        "number": "101",
+        "title": "Math 101",
+        "creditType": "fixed",
+        "creditsMin": "3",
+        "creditsMax": "",
+        "dateStart": "Fall 2019",
+        "department": "Math",
+        "campus": "Central,North"
+    },
+    {
+        "subjectCode": "BIO",
+        "number": "423",
+        "title": "Biology Research",
+        "creditType": "range",
+        "creditsMin": "3",
+        "creditsMax": "5",
+        "dateStart": "Winter 2022",
+        "department": "Biology",
+        "campus": "North,South"
+    },
+    {
+        "subjectCode": "CHEM",
+        "number": "221",
+        "title": "Organic Chemistry",
+        "creditType": "multiple",
+        "creditsMin": "3",
+        "creditsMax": "4",
+        "dateStart": "Spring 2021",
+        "department": "Chemistry",
+        "campus": "East,Central,West"
+    }
+]
