@@ -1,5 +1,6 @@
 const CSVToJSON = require('csvtojson');
 let csvFilePath = 'courses.csv';
+let api_config = require('./api_config.json');
 
 async function mainAppRun(csv) {
     const courses = await CSVToJSON().fromFile(csv)
@@ -8,5 +9,4 @@ async function mainAppRun(csv) {
     }
     console.log(courses);
 }
-
 mainAppRun(csvFilePath)
