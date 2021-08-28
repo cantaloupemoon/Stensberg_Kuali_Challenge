@@ -1,17 +1,22 @@
 const CSVToJSON = require('csvtojson');
-const csvFilePath = 'courses.csv';
+let csvFilePath = 'courses.csv';
 const fs = require('fs');
 
 // function that converts CSV to JSON file
-let getJson = function(csv) {
-    CSVToJSON().fromFile(csv)
-    .then(courses => {
-        let coursesJSON = courses;
-        console.log(coursesJSON);
-        return coursesJSON;
-    }).catch(err => {
-        console.log(err);
-    });
+async function convertCSVtoJSON(csv) {
+    const courses = await CSVToJSON().fromFile(csv)
+    return courses;
 }
 
-getJson(csvFilePath);
+// function that addes notes to returned JSON
+function addNotesToCourses(csvFilePath) {
+    convertCSVtoJSON(csvFilePath)
+        .then(courses => {
+            for (let i = 0; i < courses.length; i++) {
+                courses[i]["Notes"] = "Submitted by Shawn Stensberg"
+            }
+            console.log(courses)
+        })
+}
+
+addNotesToCourses(csvFilePath);
