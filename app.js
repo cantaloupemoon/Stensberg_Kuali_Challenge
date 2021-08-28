@@ -1,6 +1,5 @@
 const CSVToJSON = require('csvtojson');
 let csvFilePath = 'courses.csv';
-const fs = require('fs');
 
 // function that converts CSV to JSON file
 async function convertCSVtoJSON(csv) {
