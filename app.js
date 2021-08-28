@@ -1,4 +1,5 @@
 const CSVToJSON = require('csvtojson');
+const axios = require('axios');
 let csvFilePath = 'courses.csv';
 let api_config = require('./api_config.json');
 
