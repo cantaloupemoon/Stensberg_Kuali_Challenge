@@ -1,7 +1,8 @@
 const CSVToJSON = require('csvtojson');
 const axios = require('axios');
 let csvFilePath = 'courses.csv';
-let api_config = require('./api_config.json');
+const api_config = require('./api_config.json');
+const fetch = require('node-fetch')
 
 // async function mainAppRun(csv) {
 //     const courses = await CSVToJSON().fromFile(csv)
@@ -12,14 +13,15 @@ let api_config = require('./api_config.json');
 // }
 // mainAppRun(csvFilePath)
 
+console.log(/\t\r\n/.test(api_config.API_KEY)); // test to determine if key has carriage returns, new lines, or tabs
 
 const connectionConfig = {
     headers: {
-        'Authorization': api_config.API_KEY
+        'Authorization': "Bearer " + api_config.API_KEY
     }
 }
 
-axios.get(api_config.BASE_URL + api_config.CAMPUSES_OPTIONS_URI, connectionConfig)
+axios.get(api_config.BASE_URL + api_config.SUBJECTCODES_OPTIONS_URI, connectionConfig)
     .then((response) => {
         console.log(response.data);
     })
