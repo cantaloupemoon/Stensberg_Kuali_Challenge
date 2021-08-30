@@ -52,13 +52,13 @@ async function mainAppFunc(csv) {
             }
         }
         if (rawCourses[i].dateStart.includes("Winter")) {
-            formattedCourses[i].dateStart = "2021-01-01"
+            formattedCourses[i].dateStart = `${formattedCourses[i].dateStart.replace(/[^0-9.]/g, '')}-01-01`
         } else if (rawCourses[i].dateStart.includes("Spring")) {
-            formattedCourses[i].dateStart = "2021-04-03"
+            formattedCourses[i].dateStart = `${formattedCourses[i].dateStart.replace(/[^0-9.]/g, '')}-04-03`
         } else if (rawCourses[i].dateStart.includes("Summer")) {
-            formattedCourses[i].dateStart = "2021-07-04"
+            formattedCourses[i].dateStart = `${formattedCourses[i].dateStart.replace(/[^0-9.]/g, '')}-07-04`
         } else {
-            formattedCourses[i].dateStart = "2021-10-04"
+            formattedCourses[i].dateStart = `${formattedCourses[i].dateStart.replace(/[^0-9.]/g, '')}-10-04`
         }
     }
     const connectionConfig = {
@@ -68,7 +68,7 @@ async function mainAppFunc(csv) {
     }
    
     // API get request to retrieve subject codes
-    axios.get(api_config.BASE_URL + api_config.SUBJECTCODES_OPTIONS_URI, connectionConfig)
+    await axios.get(api_config.BASE_URL + api_config.SUBJECTCODES_OPTIONS_URI, connectionConfig)
         .then((response) => {
             for (var i = 0; i < response.data.length; i++) {
                 for (var j = 0; j < formattedCourses.length; j++) {
@@ -83,7 +83,7 @@ async function mainAppFunc(csv) {
         })
     
     // API get request to retrieve groups based on department
-    axios.get(api_config.BASE_URL + api_config.GROUPS_URI, connectionConfig)
+    await axios.get(api_config.BASE_URL + api_config.GROUPS_URI, connectionConfig)
         .then((response) => {
             for (var i = 0; i < response.data.length; i++) {
                 for (var j = 0; j < formattedCourses.length; j++) {
@@ -99,7 +99,7 @@ async function mainAppFunc(csv) {
             console.log(err)
         })
     
-    axios.get(api_config.BASE_URL + api_config.CAMPUSES_OPTIONS_URI, connectionConfig)
+    await axios.get(api_config.BASE_URL + api_config.CAMPUSES_OPTIONS_URI, connectionConfig)
         .then((response) => {
             for (var i = 0; i < response.data.length; i++) {
                 for (var j = 0; j < formattedCourses.length; j++) {
@@ -117,11 +117,13 @@ async function mainAppFunc(csv) {
             console.log(err)
         })
 
-        // timer function to confirm correct data is getting saved in the formattedCourses variable
-        function timer() {
-            console.log(formattedCourses);
-        }
-        setTimeout(timer, 3000);
+        // await axios.post(api_config.BASE_URL + api_config.COURSES_URI, connectionConfig, formattedCourses)
+        //     .then(response => {
+        //         console.log(response)
+        //     })
+        //     .catch(err => {
+        //         console.log(err)
+        //     })
 }
 
 mainAppFunc(csvFilePath)
