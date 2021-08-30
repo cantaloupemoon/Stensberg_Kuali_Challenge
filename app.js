@@ -3,10 +3,12 @@ const axios = require('axios')
 let csvFilePath = 'courses.csv'
 const api_config = require('./api_config.json')
 
-// main app function that converts CSV to JSON and formats the raw JSON from the CSV to a prettier version meant to push to API per the assignment requirements
+// main app function - converts CSV to JSON, creates a new pretty format for publish, and makes get/post requests to API
 async function mainAppFunc(csv) {
     var rawCourses = await CSVToJSON().fromFile(csv)
     var formattedCourses = []
+
+    // for loop goes over raw courses list, builds new courses to push to pretty shiny JSON object, and formats as possible before making API calls
     for (var i = 0; i < rawCourses.length; i++) {
         var newCourse = {
             "subjectCode": rawCourses[i].subjectCode,
@@ -30,6 +32,7 @@ async function mainAppFunc(csv) {
         }
         formattedCourses.push(newCourse)
 
+        // if statement that formats credits section per course based on information found in creditType field
         if (rawCourses[i].creditType == "fixed") {
             formattedCourses[i].credits.credits.min = rawCourses[i].creditsMin
             formattedCourses[i].credits.credits.max = rawCourses[i].creditsMin
@@ -51,6 +54,8 @@ async function mainAppFunc(csv) {
                 "max": rawCourses[i].creditsMax
             }
         }
+
+        // if statement that formats the dateStart field
         if (rawCourses[i].dateStart.includes("Winter")) {
             formattedCourses[i].dateStart = `${formattedCourses[i].dateStart.replace(/[^0-9.]/g, '')}-01-01`
         } else if (rawCourses[i].dateStart.includes("Spring")) {
@@ -61,6 +66,8 @@ async function mainAppFunc(csv) {
             formattedCourses[i].dateStart = `${formattedCourses[i].dateStart.replace(/[^0-9.]/g, '')}-10-04`
         }
     }
+
+    // variable that stores any API connection configurations
     const connectionConfig = {
         headers: {
             'Authorization': "Bearer " + api_config.API_KEY
@@ -99,6 +106,7 @@ async function mainAppFunc(csv) {
             console.log(err)
         })
     
+    // API call to retrieve campus IDs
     await axios.get(api_config.BASE_URL + api_config.CAMPUSES_OPTIONS_URI, connectionConfig)
         .then((response) => {
             for (var i = 0; i < response.data.length; i++) {
@@ -126,4 +134,5 @@ async function mainAppFunc(csv) {
         //     })
 }
 
+// calling the main app function
 mainAppFunc(csvFilePath)
