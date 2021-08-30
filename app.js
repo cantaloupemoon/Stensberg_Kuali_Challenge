@@ -4,7 +4,7 @@ let csvFilePath = 'courses.csv'
 const api_config = require('./api_config.json')
 
 // main app function that converts CSV to JSON and formats the raw JSON from the CSV to a prettier version meant to push to API per the assignment requirements
-async function formattingFunc(csv) {
+async function mainAppFunc(csv) {
     var rawCourses = await CSVToJSON().fromFile(csv)
     var formattedCourses = []
     for (var i = 0; i < rawCourses.length; i++) {
@@ -25,7 +25,7 @@ async function formattingFunc(csv) {
             "groupFilter1": "",
             "groupFilter2": "",
             "department": rawCourses[i].department,
-            "campus": rawCourses[i].campus,
+            "campus": Object.assign({}, rawCourses[i].campus.split(',')),
             "notes": "Shawn Stensberg says: Unicorns are Magnificent Beasts"
         }
         formattedCourses.push(newCourse)
@@ -61,34 +61,22 @@ async function formattingFunc(csv) {
             formattedCourses[i].dateStart = "2021-10-04"
         }
     }
-    // console.log(JSON.stringify(formattedCourses))
-    return formattedCourses
-}
-
-// executes formattingFunc to convert CSV to JSON and stores in variable I can use in the global scope
-let jsonCourses = formattingFunc(csvFilePath)
-let jsonSimple = JSON.stringify(jsonCourses)
-console.log(jsonSimple)
-jsonCourses.then(function(result){
-    var courses = result
-
-    // configuration for Authorization header to use in API calls
     const connectionConfig = {
         headers: {
             'Authorization': "Bearer " + api_config.API_KEY
         }
     }
+   
     // API get request to retrieve subject codes
     axios.get(api_config.BASE_URL + api_config.SUBJECTCODES_OPTIONS_URI, connectionConfig)
         .then((response) => {
             for (var i = 0; i < response.data.length; i++) {
-                for (var j = 0; j < courses.length; j++) {
-                    if (courses[j].subjectCode == response.data[i].name) {
-                        courses[j].subjectCode = response.data[i].id
+                for (var j = 0; j < formattedCourses.length; j++) {
+                    if (formattedCourses[j].subjectCode == response.data[i].name) {
+                        formattedCourses[j].subjectCode = response.data[i].id
                     }
                 }
             }
-            // console.log(courses)
         })
         .catch((err) => {
             console.log(err)
@@ -98,17 +86,42 @@ jsonCourses.then(function(result){
     axios.get(api_config.BASE_URL + api_config.GROUPS_URI, connectionConfig)
         .then((response) => {
             for (var i = 0; i < response.data.length; i++) {
-                for (var j = 0; j < courses.length; j++) {
-                    if (courses[j].department == response.data[i].name) {
-                        courses[j].groupFilter1 = response.data[i].updatedBy.id
-                        courses[j].groupFilter2 = response.data[i].parentId
-                        delete courses[i].department
+                for (var j = 0; j < formattedCourses.length; j++) {
+                    if (formattedCourses[j].department == response.data[i].name) {
+                        formattedCourses[j].groupFilter1 = response.data[i].updatedBy.id
+                        formattedCourses[j].groupFilter2 = response.data[i].parentId
+                        delete formattedCourses[i].department
                     }
                 }
             }
-            console.log(courses)
         })
         .catch((err) => {
             console.log(err)
         })
-})
+    
+    axios.get(api_config.BASE_URL + api_config.CAMPUSES_OPTIONS_URI, connectionConfig)
+        .then((response) => {
+            for (var i = 0; i < response.data.length; i++) {
+                for (var j = 0; j < formattedCourses.length; j++) {
+                    let campusObject = formattedCourses[j].campus
+                    for (let campusKey in campusObject) {
+                        if (formattedCourses[j].campus[campusKey] == response.data[i].name) {
+                            formattedCourses[j].campus[response.data[i].id] = true
+                            delete formattedCourses[j].campus[campusKey]
+                        }
+                    }
+                }
+            }
+        })
+        .catch((err) => {
+            console.log(err)
+        })
+
+        // timer function to confirm correct data is getting saved in the formattedCourses variable
+        function timer() {
+            console.log(formattedCourses);
+        }
+        setTimeout(timer, 3000);
+}
+
+mainAppFunc(csvFilePath)
