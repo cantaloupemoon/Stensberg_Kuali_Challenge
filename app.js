@@ -9,6 +9,25 @@ async function mainAppRun(csv) {
     var courses = await CSVToJSON().fromFile(csv)
     for (var i = 0; i < courses.length; i++) {
         courses[i]["Notes"] = "Submitted by Shawn Stensberg";
+        if (courses[i].creditType == "fixed") {
+            delete courses['creditType'];
+            courses[i]["credits"] = {
+                "min": courses[i].creditsMin,
+                "max": courses[i].creditsMin
+            }
+            courses[i]["value"] = courses[i].creditsMin
+            delete courses['creditsMin']
+            delete courses['creditsMax']
+        } else if (courses[i].creditType == "multiple") {
+            delete courses['creditType'];
+            courses[i]["credits"] = {
+                "max": courses[i].creditsMax,
+                "min": courses[i].creditsMin
+            }
+            courses[i]["value"] = [courses[i].creditsMin, courses[i].creditsMax]
+            delete courses['creditsMin']
+            delete courses['creditsMax']
+        }
     }
     return courses;
 }
@@ -17,6 +36,7 @@ async function mainAppRun(csv) {
 let jsonCourses = mainAppRun(csvFilePath);
 jsonCourses.then(function(result){
     var courses = result;
+    console.log(courses);
     // // configuration for Authorization header to use in API calls
     const connectionConfig = {
         headers: {
@@ -32,8 +52,6 @@ jsonCourses.then(function(result){
                 for (var j = 0; j < courses.length; j++) {
                     if (courses[j].subjectCode == response.data[i].name) {
                         courses[j]["subjectCode"] = response.data[i].id;
-                    } else {
-                        // console.log("No Match")
                     }
                 }
             }
@@ -41,5 +59,5 @@ jsonCourses.then(function(result){
         .catch((err) => {
             console.log(err)
         })
-    console.log(courses)
+    // console.log(courses)
 })
