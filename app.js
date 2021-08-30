@@ -1,12 +1,11 @@
-const CSVToJSON = require('csvtojson');
-const axios = require('axios');
-let csvFilePath = 'courses.csv';
-const api_config = require('./api_config.json');
+const CSVToJSON = require('csvtojson')
+const axios = require('axios')
+let csvFilePath = 'courses.csv'
+const api_config = require('./api_config.json')
 
-// main app function that converts CSV to JSON
-async function mainAppRun(csv) {
+// main app function that converts CSV to JSON and formats the raw JSON from the CSV to a prettier version meant to push to API per the assignment requirements
+async function formattingFunc(csv) {
     var rawCourses = await CSVToJSON().fromFile(csv)
-    console.log(rawCourses);
     var formattedCourses = []
     for (var i = 0; i < rawCourses.length; i++) {
         var newCourse = {
@@ -25,10 +24,11 @@ async function mainAppRun(csv) {
             "dateStart": rawCourses[i].dateStart,
             "groupFilter1": "",
             "groupFilter2": "",
-            "campus": {},
+            "department": rawCourses[i].department,
+            "campus": rawCourses[i].campus,
             "notes": "Shawn Stensberg says: Unicorns are Magnificent Beasts"
         }
-        formattedCourses.push(newCourse);
+        formattedCourses.push(newCourse)
 
         if (rawCourses[i].creditType == "fixed") {
             formattedCourses[i].credits.credits.min = rawCourses[i].creditsMin
@@ -61,37 +61,54 @@ async function mainAppRun(csv) {
             formattedCourses[i].dateStart = "2021-10-04"
         }
     }
-    // console.log(formattedCourses)
-    console.log(JSON.stringify(formattedCourses))
-    return rawCourses;
+    // console.log(JSON.stringify(formattedCourses))
+    return formattedCourses
 }
 
-// executes mainAppRun to convert CSV to JSON and stores in variable I can use in the global scope
-let jsonCourses = mainAppRun(csvFilePath);
+// executes formattingFunc to convert CSV to JSON and stores in variable I can use in the global scope
+let jsonCourses = formattingFunc(csvFilePath)
+let jsonSimple = JSON.stringify(jsonCourses)
+console.log(jsonSimple)
 jsonCourses.then(function(result){
-    var courses = result;
-    // console.log(courses);
-    // // configuration for Authorization header to use in API calls
+    var courses = result
+
+    // configuration for Authorization header to use in API calls
     const connectionConfig = {
         headers: {
             'Authorization': "Bearer " + api_config.API_KEY
         }
     }
-
-    // // API get request to retrieve subject codes
+    // API get request to retrieve subject codes
     axios.get(api_config.BASE_URL + api_config.SUBJECTCODES_OPTIONS_URI, connectionConfig)
         .then((response) => {
-            // console.log(response.data);
             for (var i = 0; i < response.data.length; i++) {
                 for (var j = 0; j < courses.length; j++) {
                     if (courses[j].subjectCode == response.data[i].name) {
-                        courses[j]["subjectCode"] = response.data[i].id;
+                        courses[j].subjectCode = response.data[i].id
                     }
                 }
             }
+            // console.log(courses)
         })
         .catch((err) => {
             console.log(err)
         })
-    // console.log(courses)
+    
+    // API get request to retrieve groups based on department
+    axios.get(api_config.BASE_URL + api_config.GROUPS_URI, connectionConfig)
+        .then((response) => {
+            for (var i = 0; i < response.data.length; i++) {
+                for (var j = 0; j < courses.length; j++) {
+                    if (courses[j].department == response.data[i].name) {
+                        courses[j].groupFilter1 = response.data[i].updatedBy.id
+                        courses[j].groupFilter2 = response.data[i].parentId
+                        delete courses[i].department
+                    }
+                }
+            }
+            console.log(courses)
+        })
+        .catch((err) => {
+            console.log(err)
+        })
 })
