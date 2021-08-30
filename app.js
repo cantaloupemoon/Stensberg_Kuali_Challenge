@@ -7,7 +7,6 @@ const api_config = require('./api_config.json')
 async function mainAppFunc(csv) {
     var rawCourses = await CSVToJSON().fromFile(csv)
     var formattedCourses = []
-
     // for loop goes over raw courses list, builds new courses to push to pretty shiny JSON object, and formats as possible before making API calls
     for (var i = 0; i < rawCourses.length; i++) {
         var newCourse = {
@@ -125,13 +124,27 @@ async function mainAppFunc(csv) {
             console.log(err)
         })
 
-        // await axios.post(api_config.BASE_URL + api_config.COURSES_URI, connectionConfig, formattedCourses)
-        //     .then(response => {
-        //         console.log(response)
-        //     })
-        //     .catch(err => {
-        //         console.log(err)
-        //     })
+        // Post API request - it is inside of a .forEach because when I attempted to send all 4 courses at once, I received a "Course must have status" error.
+        // I did some testing around this error in Postman and determined I needed to send 1 course at a time.
+        formattedCourses.forEach(element => {
+            var postConfig = {
+                method: "post",
+                url: api_config.BASE_URL + api_config.COURSES_URI,
+                headers: {
+                    'Authorization': "Bearer " + api_config.API_KEY
+                },
+                data: element
+            }
+            axios(postConfig)
+                .then(function (response) {
+                    console.log(JSON.stringify(response.data));
+                })
+                .catch(function (error) {
+                    console.error(error.response.data);
+                });
+        })
+
+
 }
 
 // calling the main app function
