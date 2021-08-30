@@ -16,31 +16,30 @@ async function mainAppRun(csv) {
 // executes mainAppRun to convert CSV to JSON and stores in variable I can use in the global scope
 let jsonCourses = mainAppRun(csvFilePath);
 jsonCourses.then(function(result){
-    // console.log(result);
-})
-
-// configuration for Authorization header to use in API calls
-const connectionConfig = {
-    headers: {
-        'Authorization': "Bearer " + api_config.API_KEY
+    var courses = result;
+    // // configuration for Authorization header to use in API calls
+    const connectionConfig = {
+        headers: {
+            'Authorization': "Bearer " + api_config.API_KEY
+        }
     }
-}
 
-// API get request to retrieve subject codes
-axios.get(api_config.BASE_URL + api_config.SUBJECTCODES_OPTIONS_URI, connectionConfig)
-    .then((response) => {
-        // console.log(response.data);
-        for (var i = 0; i < response.data.length; i++) {
-            console.log(jsonCourses)
-            for (var j = 0; j < jsonCourses.length; j++) {
-                if (jsonCourses[j].subjectCode == response.data[i].name) {
-                    jsonCourses[j].subjectCode == response.data[i].id;
-                } else {
-                    console.log(jsonCourses)
+    // // API get request to retrieve subject codes
+    axios.get(api_config.BASE_URL + api_config.SUBJECTCODES_OPTIONS_URI, connectionConfig)
+        .then((response) => {
+            // console.log(response.data);
+            for (var i = 0; i < response.data.length; i++) {
+                for (var j = 0; j < courses.length; j++) {
+                    if (courses[j].subjectCode == response.data[i].name) {
+                        courses[j]["subjectCode"] = response.data[i].id;
+                    } else {
+                        // console.log("No Match")
+                    }
                 }
             }
-        }
-    })
-    .catch((err) => {
-        console.log(err)
-    })
+        })
+        .catch((err) => {
+            console.log(err)
+        })
+    console.log(courses)
+})
